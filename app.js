@@ -18,7 +18,8 @@ app.use(express.json());
 const postsRouter = require("./routes/posts.js");
 const listsRouter = require("./routes/index.js");
 const commentRouter = require("./routes/comments.js");
-app.use("/api", [postsRouter, listsRouter, commentRouter]);
+const userRouter = require("./routes/users.js");
+app.use("/api", [postsRouter, listsRouter, commentRouter, userRouter]);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

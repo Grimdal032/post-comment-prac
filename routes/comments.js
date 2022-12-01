@@ -9,8 +9,8 @@ router.post("/comments/:_postId", async (req, res) => {
         const { _postId } = req.params;
         const { user, password, content } = req.body;
         const syncTime = new Date().toISOString();
-        const existslist = await Posts.find({_id: _postId});
-        if((existslist.length > 0) && req.body.content != undefined) {
+        const existslist = await Posts.findOne({_id: _postId});
+        if((existslist !== null) && (content !== undefined)) {
             const createdComments = await Comments.create({ _postId, user, password, content, syncTime });
             res.status(200).json({ message: "댓글을 생성하였습니다." });
         }else {
@@ -44,10 +44,11 @@ router.put("/comments/:_commentId", async (req, res) => {
     try {
         const { _commentId } = req.params;
         const { password, content } = req.body;
-        const existComment = await Comments.find({_id: _commentId});
-        console.log(existComment);
+        const existComment = await Comments.findOne({_id: _commentId});
+        console.log(existComment[0].password);
+        console.log(content, password);
 
-        if(existComment.length > 0) {
+        if(existComment !== null) {
             if(content == undefined) { 
                 return res.status(400).json({massage: "댓글 내용을 입력해주세요."});
             }else if(password == existComment[0].password){
@@ -86,4 +87,3 @@ router.delete("/comments/:_commentId", async (req, res) => {
 })
 
 module.exports = router;
-

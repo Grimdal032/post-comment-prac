@@ -19,18 +19,18 @@ router.get("/posts", async (req, res) => {
 router.get("/posts/:_postId", async (req, res) => {
     try {
         const { _postId } = req.params;
-        const posts = await Posts.find({_id: _postId});
+        const post = await Posts.findOne({_id: _postId});
         res.status(200).json({
-            data : posts.map((list) => ({
-                postId: list._id,
-                user: list.user,
-                title: list.title,
-                content: list.content,
-                createdAt: list.createdAt
-            })),
-        });
+            data : {
+                postId: post._id,
+                user: post.user,
+                title: post.title,
+                content: post.content,
+                createdAt: post.createdAt
+            }
+        })
     } catch (err) {
-        return res.status(400).json({ message : "데이터 형식이 올바르지 않습니다."})
+        return res.status(400).json({ message : "데이터 형식이 올바르지 않습니다."});
     }
 });
 
@@ -39,10 +39,10 @@ router.put("/posts/:_postId", async (req, res) => {
     try { 
         const { _postId } = req.params;
         const { password, title, content } = req.body;
-        const existslist = await Posts.find({_id: _postId});
-        if (existslist.length) {
-            if(existslist[0].password == password) {
-                await Posts.updateOne({ _id: _postId }, { $set: {title} }, { $set: {content} });
+        const existslist = await Posts.findOne({_id: _postId});
+        if (existslist !== null) {
+            if(existslist.password == password) {
+                await Posts.updateOne({ _id: _postId }, { $set: {title, content} });
                 return res.status(200).json({message: "게시글을 수정하였습니다."});
             }else {
                 return res.status(400).json({message: "비밀번호가 틀렸습니다."});
@@ -60,10 +60,9 @@ router.delete("/posts/:_postId", async (req, res) => {
     try { 
         const { _postId } = req.params;
         const { password } = req.body;
-        const existslist = await Posts.find({_id: _postId});
-        console.log(existslist);
-        if (existslist) {
-            if(existslist[0].password == password) {
+        const existslist = await Posts.findOne({_id: _postId});
+        if (existslist !== null) {
+            if(existslist.password == password) {
                 console.log(existslist[0].password, "ture", password);
                 await Posts.deleteOne({ _id: _postId });
                 return res.status(200).json({message: "게시글 삭제 완료"});
@@ -71,7 +70,6 @@ router.delete("/posts/:_postId", async (req, res) => {
                 return res.status(400).json({message: "비밀번호가 틀렸습니다."});
             }
         } else {
-            console.log("false");
             return res.status(400).json({message: "게시글 조회에 실패하였습니다."});
         }
     } catch (err) {
